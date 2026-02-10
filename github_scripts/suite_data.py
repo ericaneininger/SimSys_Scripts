@@ -213,17 +213,17 @@ class SuiteData:
         Work out what repo launched the suite based on the what sources are available in
         the dependencies. Return 'unknown' if unable to determine.
         """
+        # Get a list of dependencies with no declared reference -
+        # These must be either a working copy or extracting from HEAD
+        ref_none = [d for d, v in self.dependencies.items() if v['ref'] is None]
 
-        # If just 1 dependency, it must be that
-        if len(self.dependencies) == 1:
-            return list(self.dependencies.keys())[0]
+        # Ignore a SimSys_Scripts dependency - it does not have a rose-stem
+        ref_none = [d for d in ref_none if d.lower() not in ['simsys_scripts']]
 
-        # If 2 dependencies, remove simsys_scripts
-        if len(self.dependencies) == 2:
-            for item in self.dependencies:
-                if item.lower() != "simsys_scripts":
-                    return item
-
+        # If just 1 dependency with "ref" is None, it must be that
+        if len(ref_none) == 1:
+            return ref_none[0]
+ 
         # If LFRic Apps in sources, that is the primary source
         if "lfric_apps" in self.dependencies.keys():
             return "lfric_apps"
